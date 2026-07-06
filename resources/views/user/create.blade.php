@@ -1,67 +1,69 @@
 <x-app>
+    <x-slot:title>
+        {{ $title }}
+    </x-slot>
 
-    <x-slot:title>{{ $title }}</x-slot:title>
-
-    <div class="card shadow p-3 mb-3">
-        <h5 class="fw-bold mb-0">{{ $title }}</h5>
-    </div>
-
-    <div class="card shadow p-3">
-        <form method="POST" action="{{ route('user.store') }}" class="form" enctype="multipart/form-data">
+    <div class="card shadow p-4">
+        <form method="POST" action="{{ route('user.store') }}" class="form" enctype="multipart/form-data"
+            data-parsley-validate>
             @csrf
 
-            <!-- Baris Input Grid -->
-            <div class="row g-3">
-                <!-- Input Nama -->
+            <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label for="name" class="form-label required">Name</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" name="name"
-                        id="name" value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required>
+                    <label for="name" class="form-label required">Nama Mahasiswa <span
+                            class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
+                        name="name" value="{{ old('name') }}" required maxlength="255"
+                        data-parsley-required-message="Nama Harus Diisi">
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <!-- Input Email -->
                 <div class="col-md-6">
-                    <label for="email" class="form-label required">Email</label>
+                    <label for="email" class="form-label required">Email <span class="text-danger">*</span></label>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                        name="email" value="{{ old('email') }}" placeholder="Masukkan email" required>
+                        name="email" value="{{ old('email') }}" required
+                        data-parsley-required-message="Email Harus Diisi">
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+            </div>
 
-                <!-- Input Password -->
+            <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label for="password" class="form-label required">Password</label>
+                    <label for="password" class="form-label required">Password <span
+                            class="text-danger">*</span></label>
                     <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
-                        name="password" placeholder="Masukkan password" minlength="8" required>
+                        name="password" required minlength="8" data-parsley-required-message="Password Harus Diisi">
                     @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <!-- Input Konfirmasi Password -->
                 <div class="col-md-6">
-                    <label for="password_confirmation" class="form-label required">Konfirmasi Password</label>
-                    <!-- FIXED: Menghapus karakter '>' yang bocor di ujung tag -->
-                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
-                        placeholder="Masukkan ulang password" minlength="8" required data-parsley-equalTo="#password">
+                    <label for="passwordconfirm" class="form-label required">Konfirmasi Password <span
+                            class="text-danger">*</span></label>
+                    <input type="password" class="form-control @error('passwordconfirm') is-invalid @enderror"
+                        id="passwordconfirm" name="passwordconfirm" required minlength="8"
+                        data-parsley-equalto="#password"
+                        data-parsley-required-message="Konfirmasi Password Harus Diisi">
+                    @error('passwordconfirm')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
+            </div>
 
-                <!-- Input Role -->
+            <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label for="role" class="form-label required">Role</label>
-                    <select class="form-select @error('role') is-invalid @enderror" name="role" required>
-                        <!-- FIXED: Menghapus duplikasi tulisan Pilih Role -->
-                        <option value="">Pilih Role</option>
-                        <option value="Superadmin" @selected(old('role') == 'Superadmin')>
-                            Superadmin
+                    <label for="role" class="form-label required">Role <span class="text-danger">*</span></label>
+                    <select name="role" id="role" class="form-select select2" required
+                        data-parsley-required-message="Role Harus Dipilih">
+                        <option value="">-- Pilih Role --</option>
+                        <option value="Superadmin" {{ old('role') == 'Superadmin' ? 'selected' : '' }}>Superadmin
                         </option>
-                        <option value="Admin" @selected(old('role') == 'Admin')>
-                            Admin
-                        </option>
+                        <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('role')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -69,17 +71,19 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label for="avatar" class="form-label">Avatar (MaxSize 1Mb)</label>
+                    <label for="avatar" class="form-label">Avatar</label>
                     <input type="file" class="form-control @error('avatar') is-invalid @enderror" id="upload"
-                        name="avatar">
+                        name="avatar" accept="image/*">
                     @error('avatar')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    <img src="{{ asset('niceadmin/img/noprofil.png') }}" alt="Avatar" class="w-50 rounded mt-2"
-                        id="preview">
+
+                    <div class="mt-2">
+                        <img src="{{ asset('niceadmin/img/noprofil.png') }}" alt="Avatar" class="rounded border"
+                            style="width: 120px; height: 120px; object-fit: cover;" id="preview">
+                    </div>
                 </div>
             </div>
-
 
             <div class="text-end">
                 <a class="btn btn-warning" href="{{ route('user.index') }}" role="button">Cancel</a>
@@ -88,10 +92,20 @@
         </form>
     </div>
 
-    @push('modals')
-    @endpush
-
     @push('scripts')
+        <script>
+            $(document).ready(function() {
+                $('.select2').select2({
+                    theme: 'bootstrap-5'
+                });
+                $("#upload").change(function() {
+                    let reader = new FileReader();
+                    reader.onload = (e) => {
+                        $("#preview").attr("src", e.target.result);
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                });
+            });
+        </script>
     @endpush
-
 </x-app>

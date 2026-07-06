@@ -219,7 +219,6 @@
             class="bi bi-arrow-up-short"></i></a>
 
     @push('modals')
-
         <!-- add on -->
         <script src="{{ asset('niceadmin/vendor/jquery/jquery-3.7.1.min.js') }}"></script>
         <script src="{{ asset('niceadmin/vendor/parsley/parsley.min.js') }}"></script>
@@ -261,8 +260,55 @@
             })
         </script>
 
-        @stack('scripts')
+        {{-- modal delete --}}
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="" method="POST" id="form-delete">
+                        @method('DELETE')
+                        @csrf
+                        <div class="modal-body">
+                            <a>Anda yakin ingin menghapus data?</a>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Ya, Hapus data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @stack('modals')
+        <script>
+            // Inisialisasi tema select2 bawaan teman Anda
+            $('.select2-default').select2({
+                theme: 'bootstrap-5',
+                width: "100%",
+            });
+            // SweetAlert2 Flash Message Handler
+            let flashSuccess = "{{ session('success') ?? '' }}";
+            if (flashSuccess) {
+                Swal.fire({
+                    title: "MANTAP!",
+                    text: flashSuccess,
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+            }
+            let flashError = "{{ session('error') ?? '' }}";
+            if (flashError) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Waduh...",
+                    text: flashError,
+                });
+            }
+        </script>
+    @endpush
 
-    </body>
+    @stack('scripts')
 
-    </html>
+</body>
+
+</html>
