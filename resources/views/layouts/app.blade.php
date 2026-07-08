@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>{{ $title }}</title>
-    <meta content="" name="description">
-    <meta content="" name="keywords">
-    <meta content="" name="author">
-
-    {{-- {{ asset('niceadmin') }} --}}
+    <title>{{ $setting->app_name }} | {{ $title }}</title>
+    <meta content="{{ $setting->description }}" name="description">
+    <meta content="{{ $setting->keywords }}" name="keywords">
+    <meta content="Hajar Aswad" name="author">
 
     <!-- Favicons -->
-    <link href="{{ asset('niceadmin/img/favicon.png') }}" rel="icon">
-    <link href="{{ asset('niceadmin/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+    <link href="{{ $setting->logo ? asset('storage/' . $setting->logo) : asset('niceadmin/img/logo.png') }}"
+        rel="icon">
+    <link href="{{ $setting->logo ? asset('storage/' . $setting->logo) : asset('niceadmin/img/logo.png') }}"
+        rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -73,14 +73,6 @@
             background: #fff;
         }
     </style>
-
-    <!-- =======================================================
-  * Template Name: NiceAdmin
-  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
-  * Updated: Apr 20 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body>
@@ -90,8 +82,9 @@
 
         <div class="d-flex align-items-center justify-content-between">
             <a href="{{ route('dashboard.index') }}" class="logo d-flex align-items-center">
-                <img src="{{ asset('niceadmin/img/logo.png') }}" alt="">
-                <span class="d-none d-lg-block">NiceAdmin</span>
+                <img src="{{ $setting->logo ? asset('storage/' . $setting->logo) : asset('niceadmin/img/logo.png') }}"
+                    alt="">
+                <span class="d-none d-lg-block">{{ $setting->app_name }}</span>
             </a>
             <i class="bi bi-list toggle-sidebar-btn"></i>
         </div><!-- End Logo -->
@@ -103,21 +96,24 @@
 
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#"
                         data-bs-toggle="dropdown">
-                        <img src="{{ asset('niceadmin/img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
-                        <span class="d-none d-md-block dropdown-toggle ps-2">K. Anderson</span>
+                        <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('niceadmin/img/noprofil.png') }}"
+                            alt="Profile" class="rounded-circle">
+                        <span class="d-none d-md-block dropdown-toggle ps-2">
+                            {{ Auth::user()->name }}
+                        </span>
                     </a><!-- End Profile Iamge Icon -->
 
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                         <li class="dropdown-header">
-                            <h6>Kevin Anderson</h6>
-                            <span>Web Designer</span>
+                            <h6>{{ Auth::user()->name }}</h6>
+                            <span>{{ Auth::user()->role }}</span>
                         </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('dashboard.show') }}">
                                 <i class="bi bi-person"></i>
                                 <span>My Profile</span>
                             </a>
@@ -127,7 +123,7 @@
                         </li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('dashboard.edit') }}">
                                 <i class="bi bi-gear"></i>
                                 <span>Account Settings</span>
                             </a>
@@ -137,7 +133,8 @@
                         </li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <a class="dropdown-item d-flex align-items-center" data-bs-toggle="modal"
+                                data-bs-target="#logoutModal">
                                 <i class="bi bi-box-arrow-right"></i>
                                 <span>Sign Out</span>
                             </a>
@@ -170,12 +167,58 @@
                     <span>Setting</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ route('user.index') }}">
-                    <i class="bx bx-user-pin"></i>
-                    <span>User</span>
-                </a>
-            </li>
+
+            <aside id="sidebar" class="sidebar">
+                <ul class="sidebar-nav" id="sidebar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="{{ route('dashboard.index') }}">
+                            <i class="bi bi-grid"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link collapsed" href="{{ route('setting.index') }}">
+                            <i class="bx bx-cog"></i>
+                            <span>Setting</span>
+                        </a>
+                    </li>
+
+                    @if (Auth::user()->role == 'Superadmin')
+                        <li class="nav-item">
+                            <a class="nav-link collapsed" href="{{ route('user.index') }}">
+                                <i class="bx bx-user-pin"></i>
+                                <span>User</span>
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+            </aside>
+            <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <p>Anda yakin ingin logout?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                            <a href="{{ route('login.logout') }}" type="button" class="btn btn-primary">Ya, Saya
+                                ingin logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            @if (Auth::user()->role == 'Superadmin')
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="{{ route('user.index') }}">
+                        <i class="bx bx-user-pin"></i>
+                        <span>User</span>
+                    </a>
+                </li>
+            @endif
 
         </ul>
 
@@ -190,7 +233,7 @@
     <!-- ======= Footer ======= -->
     <footer id="footer" class="footer">
         <div class="copyright">
-            &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+            &copy; {{ $setting->copyright }}
         </div>
         <div class="credits">
             <!-- All the links in the footer should remain intact. -->
@@ -205,94 +248,108 @@
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
             class="bi bi-arrow-up-short"></i></a>
 
-    @push('modals')
-        <!-- add on -->
-        <script src="{{ asset('niceadmin/vendor/jquery/jquery-3.7.1.min.js') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/parsley/parsley.min.js') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/sweetalert2/sweetalert2@11') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/dataTables/js/dataTables.js') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/dataTables/js/dataTables.bootstrap5.js') }}"></script>
-
-        <!-- Vendor JS Files -->
-        <script src="{{ asset('niceadmin/vendor/apexcharts/apexcharts.min.js') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/tinymce/tinymce.min.js') }}"></script>
-        <script src="{{ asset('niceadmin/vendor/select2/js/select2.min.js') }}"></script>
-
-        <!-- Template Main JS File -->
-        <script src="{{ asset('niceadmin/js/main.js') }}"></script>
-
-        <script>
-            new DataTable('#data-table');
-
-            $('.form').parsley({
-                errorClass: 'is-invalid text-red',
-                successClass: 'is-valid',
-                errorsWrapper: '<span class="invalid-feedback"></span>',
-                errorTemplate: '<span></span>',
-                trigger: 'change'
-            });
-
-            $('#upload').on('change', function(event) {
-                $('#preview').attr('src', URL.createObjectURL(event.target.files[0]));
-            })
-
-            $('#upload-2').on('change', function(event) {
-                $('#preview-2').attr('src', URL.createObjectURL(event.target.files[0]));
-            })
-
-            $('.select2-default').select2({
-                theme: 'bootstrap-5',
-                width: "100%",
-            })
-        </script>
-
-        {{-- modal delete --}}
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form action="" method="POST" id="form-delete">
-                        @method('DELETE')
-                        @csrf
-                        <div class="modal-body">
-                            <a>Anda yakin ingin menghapus data?</a>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">Ya, Hapus data</button>
-                        </div>
-                    </form>
+    {{-- modal delete --}}
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="" method="POST" id="form-delete">
+                    @method('DELETE')
+                    @csrf
+                    <div class="modal-body">
+                        <a>Anda yakin ingin menghapus data?</a>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Ya, Hapus data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Modal logout -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p>Anda yakin ingin logout?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                    <a href="{{ route('login.logout') }}" type="button" class="btn btn-primary">Ya, Saya ingin
+                        logout</a>
                 </div>
             </div>
         </div>
-        @stack('modals')
-        <script>
-            // Inisialisasi tema select2 bawaan teman Anda
-            $('.select2-default').select2({
+    </div>
+    @stack('modals')
+
+    <!-- add on -->
+    <script src="{{ asset('niceadmin/vendor/jquery/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/parsley/parsley.min.js') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/sweetalert2/sweetalert2@11') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/dataTables/js/dataTables.js') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/dataTables/js/dataTables.bootstrap5.js') }}"></script>
+
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('niceadmin/vendor/apexcharts/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/tinymce/tinymce.min.js') }}"></script>
+    <script src="{{ asset('niceadmin/vendor/select2/js/select2.min.js') }}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{{ asset('niceadmin/js/main.js') }}"></script>
+
+    <script>
+        new DataTable('#data-table');
+
+        $('.form').parsley({
+            errorClass: 'is-invalid text-red',
+            successClass: 'is-valid',
+            errorsWrapper: '<span class="invalid-feedback"></span>',
+            errorTemplate: '<span></span>',
+            trigger: 'change'
+        });
+
+        $('#upload').on('change', function(event) {
+            $('#preview').attr('src', URL.createObjectURL(event.target.files[0]));
+        })
+
+        $('#upload-2').on('change', function(event) {
+            $('#preview-2').attr('src', URL.createObjectURL(event.target.files[0]));
+        })
+
+        $('.select2-default').select2({
+            theme: 'bootstrap-5',
+            width: "100%",
+        })
+
+        // SweetAlert2 Flash Message Handler
+        let flashSuccess = "{{ session('success') ?? '' }}";
+        if (flashSuccess) {
+            Swal.fire({
+                title: "MANTAP!",
+                text: flashSuccess,
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        }
+        let flashError = "{{ session('error') ?? '' }}";
+        if (flashError) {
+            Swal.fire({
+                icon: "error",
+                title: "Waduh...",
+                text: flashError,
+            });
+        }
+
+        <
+        script >
+            $('.select2').select2({
                 theme: 'bootstrap-5',
                 width: "100%",
-            });
-            // SweetAlert2 Flash Message Handler
-            let flashSuccess = "{{ session('success') ?? '' }}";
-            if (flashSuccess) {
-                Swal.fire({
-                    title: "MANTAP!",
-                    text: flashSuccess,
-                    icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
-            }
-            let flashError = "{{ session('error') ?? '' }}";
-            if (flashError) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Waduh...",
-                    text: flashError,
-                });
-            }
-        </script>
-    @endpush
+            })
+    </script>
 
     @stack('scripts')
 
