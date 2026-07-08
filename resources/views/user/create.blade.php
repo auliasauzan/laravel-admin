@@ -58,8 +58,7 @@
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label for="role" class="form-label required">Role <span class="text-danger">*</span></label>
-                    <select name="role" id="role" class="form-select select2" required
-                        data-parsley-required-message="Role Harus Dipilih">
+                    <select name="role" id="role" class="form-select select2" required>
                         <option value="">-- Pilih Role --</option>
                         <option value="Superadmin" {{ old('role') == 'Superadmin' ? 'selected' : '' }}>Superadmin
                         </option>
@@ -79,8 +78,8 @@
                     @enderror
 
                     <div class="mt-2">
-                        <img src="{{ asset('niceadmin/img/noprofil.png') }}" alt="Avatar" class="rounded border"
-                            style="width: 120px; height: 120px; object-fit: cover;" id="preview">
+                        <img src="{{ asset('niceadmin/img/noprofil.png') }}" alt="Avatar" class="w-50 rounded mt-2"
+                            id="preview">
                     </div>
                 </div>
             </div>
@@ -98,12 +97,16 @@
                 $('.select2').select2({
                     theme: 'bootstrap-5'
                 });
-                $("#upload").change(function() {
-                    let reader = new FileReader();
-                    reader.onload = (e) => {
-                        $("#preview").attr("src", e.target.result);
-                    };
-                    reader.readAsDataURL(this.files[0]);
+                // Script otomatis untuk preview gambar real-time saat file dipilih
+                $('#upload').on('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        let reader = new FileReader();
+                        reader.onload = function(event) {
+                            $('#preview').attr('src', event.target.result);
+                        }
+                        reader.readAsDataURL(file);
+                    }
                 });
             });
         </script>
